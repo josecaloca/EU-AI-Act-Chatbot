@@ -12,44 +12,36 @@ os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
 
 #Streamlit app
 
-st.header("Chat with websites")
+st.header("EU AI Act info")
 
 chat_history=[]
 vector_store=[]
 
+# Message container
+if "chat_history" not in st.session_state:
+  st.session_state.chat_history = [
+    AIMessage(content="Ask me anything about the new EU AI Act!")
+  ]
+# create conversation chain
+if vector_store not in st.session_state:
+  st.session_state.vector_store = get_vector_store("./data/EU_AI_Act_June_2024.pdf")
 
-# Sidebar
-# URL pasting in sidebar on the left
-with st.sidebar:
-  st.header("Paste your URL")
-  website_url = st.text_input("Enter URL")
+st.write("Ask me anything about the new EU AI Act!")
+user_input = st.chat_input("Type your message here...")
+if user_input is not None and user_input.strip() != "":
+  response = get_response(user_input)
 
-if website_url is None or website_url.strip()=="":
-  st.info("Please enter a website URL")
-else:
-  #session state
-  if "chat_history" not in st.session_state:
-    st.session_state.chat_history=[
-        AIMessage(content="I am a bot, how can I help you?")
-    ]
-   #create conversation chain
-  if vector_store not in st.session_state:
-      st.session_state.vector_store = get_vector_store("./../data/EU_AI_Act_June_2024.pdf")
+  st.session_state.chat_history.append(HumanMessage(content=user_input))
+  st.session_state.chat_history.append(AIMessage(content=response))
 
-  user_input=st.chat_input("Type your message here...")
-  if user_input is not None and user_input.strip()!="":
-    response = get_response(user_input)
+for message in st.session_state.chat_history:
+  if isinstance(message, AIMessage):
+    with st.chat_message("AI"):
+      st.write(message.content)
+  else:
+    with st.chat_message("Human"):
+      st.write(message.content)
 
-    st.session_state.chat_history.append(HumanMessage(content=user_input))
-    st.session_state.chat_history.append(AIMessage(content=response))
-
-  for message in st.session_state.chat_history:
-      if isinstance(message,AIMessage):
-        with st.chat_message("AI"):
-          st.write(message.content)
-      else:
-        with st.chat_message("Human"):
-          st.write(message.content)
 
 
 
