@@ -34,7 +34,7 @@ else:
     ]
    #create conversation chain
   if vector_store not in st.session_state:
-      st.session_state.vector_store = get_vector_store(website_url)
+      st.session_state.vector_store = get_vector_store("./../data/EU_AI_Act_June_2024.pdf")
 
   user_input=st.chat_input("Type your message here...")
   if user_input is not None and user_input.strip()!="":
