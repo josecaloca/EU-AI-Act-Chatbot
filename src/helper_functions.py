@@ -1,5 +1,5 @@
 import langchain_community
-from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -7,10 +7,11 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
+import streamlit as st
 
-#Return vectorstore for the URL
-def get_vector_store(url):
-  loader = WebBaseLoader(url)
+#Return vectorstore for the PDF_path
+def get_vector_store(PDF_path):
+  loader = PyPDFLoader(PDF_path)
   data = loader.load()
 
   text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
