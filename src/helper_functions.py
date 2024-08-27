@@ -1,10 +1,5 @@
-import langchain_community
-<<<<<<< HEAD
 from langchain_community.document_loaders.pdf import PyPDFLoader
-=======
-from langchain_community.document_loaders import PyPDFLoader
->>>>>>> 23b3e95c0cb927a8600de0f82ec89a6d4c835dd7
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
@@ -13,21 +8,39 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 import streamlit as st
 
-<<<<<<< HEAD
+
 #Return vectorstore for the PDF_path
 def get_vector_store(PDF_path):
-  loader = PyPDFLoader(PDF_path)
-=======
-#Return vectorstore for the URL
-def get_vector_store(path):
-  loader = PyPDFLoader(path)
->>>>>>> 23b3e95c0cb927a8600de0f82ec89a6d4c835dd7
-  data = loader.load()
+    # Load the PDF content
+    loader = PyPDFLoader(PDF_path)
+    data = loader.load()
 
-  text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-  chunks = text_splitter.split_documents(data)
-  vector_store = FAISS.from_documents(chunks, OpenAIEmbeddings())
-  return vector_store
+    # Define a custom text splitter with adjusted chunk size, overlap, and section-based splitting
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=400,  # Adjusted chunk size for better balance
+        chunk_overlap=100,  # Adjusted overlap to ensure context retention
+        separators=["\n\n", "\n", " "]  # Splitting by sections, paragraphs, and words
+    )
+
+    # Split the document into chunks
+    chunks = text_splitter.split_documents(data)
+
+    # Create the vector store from chunks
+    vector_store = FAISS.from_documents(chunks, OpenAIEmbeddings())
+    return vector_store
+
+def save_vector_store(vector_store, save_path):
+    # Save the FAISS index to disk
+    vector_store.save_local(save_path)
+    print(f"Vector store saved at: {save_path}")
+    
+
+def load_vector_store(load_path):
+    # Load the FAISS index from disk
+    vector_store = FAISS.load_local(load_path, OpenAIEmbeddings(), allow_dangerous_deserialization = True)
+    print(f"Vector store loaded from: {load_path}")
+    return vector_store
+
 
 #Returns history_retriever_chain
 def get_retreiver_chain(vector_store):
