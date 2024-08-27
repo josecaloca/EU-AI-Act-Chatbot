@@ -43,17 +43,29 @@ def load_vector_store(load_path):
 
 
 #Returns history_retriever_chain
-def get_retreiver_chain(vector_store):
-  llm=ChatOpenAI()
-  retriever = vector_store.as_retriever()
-  prompt = ChatPromptTemplate.from_messages([
-      MessagesPlaceholder(variable_name="chat_history"),
-      ("user","{input}"),
-      ("user","Given the above conversation, generate a search query to look up in order to get information relevant to the conversation")
-  ])
-  history_retriver_chain = create_history_aware_retriever(llm,retriever,prompt)
+def get_retreiver_chain(vector_store, 
+                        temperature = 0.7, 
+                        max_tokens = 150):
+    
+    llm = ChatOpenAI(model="gpt-4o", temperature = temperature, max_tokens = max_tokens)
+    retriever = vector_store.as_retriever()
+    prompt = ChatPromptTemplate.from_messages([
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("user", "{input}"),
+        ("user", """
+        You are an expert on Artificial Intelligence and the AI-act regulation from the European Union and European policy making.
+        Your goal is to make it easier for people to understand the AI-Act from the EU.
 
-  return history_retriver_chain
+        # Make sure to:
+        - Clearly state if you can't find the answer to the query. Do not try to invent an answer.
+        - Focus on the differences in the text between the European Union entities: commission, council, parliament, as well as the political groups and committees.
+        - Your answer must be short and concise.
+        - Do not try to imagine a fake answer if you don't have the necessary information.
+        """)
+    ])
+    history_retriver_chain = create_history_aware_retriever(llm, retriever, prompt)
+    return history_retriver_chain
+
 
 #Returns conversational rag
 def get_conversational_rag(history_retriever_chain):
