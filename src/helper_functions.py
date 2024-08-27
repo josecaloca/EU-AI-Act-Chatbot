@@ -26,7 +26,7 @@ def get_vector_store(PDF_path):
     chunks = text_splitter.split_documents(data)
 
     # Create the vector store from chunks
-    vector_store = FAISS.from_documents(chunks, OpenAIEmbeddings())
+    vector_store = FAISS.from_documents(chunks, OpenAIEmbeddings(model = "text-embedding-3-large"))
     return vector_store
 
 def save_vector_store(vector_store, save_path):
@@ -37,7 +37,7 @@ def save_vector_store(vector_store, save_path):
 
 def load_vector_store(load_path):
     # Load the FAISS index from disk
-    vector_store = FAISS.load_local(load_path, OpenAIEmbeddings(), allow_dangerous_deserialization = True)
+    vector_store = FAISS.load_local(load_path, OpenAIEmbeddings(model = "text-embedding-3-large"), allow_dangerous_deserialization = True)
     print(f"Vector store loaded from: {load_path}")
     return vector_store
 
@@ -47,7 +47,7 @@ def get_retreiver_chain(vector_store,
                         temperature = 0.7, 
                         max_tokens = 150):
     
-    llm = ChatOpenAI(model="gpt-4o", temperature = temperature, max_tokens = max_tokens)
+    llm = ChatOpenAI(model = "gpt-3.5-turbo", temperature = temperature, max_tokens = max_tokens)
     retriever = vector_store.as_retriever()
     prompt = ChatPromptTemplate.from_messages([
         MessagesPlaceholder(variable_name="chat_history"),

@@ -17,7 +17,7 @@ vector_store=[]
 #session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
-        AIMessage(content="I am a bot, how can I help you?")
+        AIMessage(content="Hi I'm EuroX, how can I help you?")
     ]
 
 if vector_store not in st.session_state:
