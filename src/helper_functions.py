@@ -10,23 +10,27 @@ import streamlit as st
 
 
 #Return vectorstore for the PDF_path
-def get_vector_store(PDF_path):
-    # Load the PDF content
-    loader = PyPDFLoader(PDF_path)
-    data = loader.load()
+def get_vector_store(pdf_files):
+    all_chunks = []
+    
+    for pdf_file in pdf_files:
+        # Load the PDF content
+        loader = PyPDFLoader(pdf_file)
+        data = loader.load()
 
-    # Define a custom text splitter with adjusted chunk size, overlap, and section-based splitting
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=400,  # Adjusted chunk size for better balance
-        chunk_overlap=100,  # Adjusted overlap to ensure context retention
-        separators=["\n\n", "\n", " "]  # Splitting by sections, paragraphs, and words
-    )
+        # Define a custom text splitter with adjusted chunk size, overlap, and section-based splitting
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=450,  # Adjusted chunk size for better balance
+            chunk_overlap=150,  # Adjusted overlap to ensure context retention
+            separators=["\n\n", "\n", " "]  # Splitting by sections, paragraphs, and words
+        )
 
-    # Split the document into chunks
-    chunks = text_splitter.split_documents(data)
+        # Split the document into chunks and accumulate them
+        chunks = text_splitter.split_documents(data)
+        all_chunks.extend(chunks)
 
-    # Create the vector store from chunks
-    vector_store = FAISS.from_documents(chunks, OpenAIEmbeddings(model = "text-embedding-3-large"))
+    # Create the vector store from all chunks
+    vector_store = FAISS.from_documents(all_chunks, OpenAIEmbeddings(model="text-embedding-3-large"))
     return vector_store
 
 def save_vector_store(vector_store, save_path):
@@ -45,7 +49,7 @@ def load_vector_store(load_path):
 #Returns history_retriever_chain
 def get_retreiver_chain(vector_store, 
                         temperature = 0.7, 
-                        max_tokens = 150):
+                        max_tokens = 1000):
     
     llm = ChatOpenAI(model = "gpt-3.5-turbo", temperature = temperature, max_tokens = max_tokens)
     retriever = vector_store.as_retriever()

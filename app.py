@@ -28,9 +28,11 @@ if vector_store not in st.session_state:
         st.session_state.vector_store = load_vector_store(vector_store_folder)
     else:
         # If the folder doesn't exist, create and save the vector store
-        PDF_path = "./data/EU_AI_Act_June_2024.pdf"
-        st.session_state.vector_store = get_vector_store(PDF_path)
-        save_vector_store(st.session_state.vector_store, vector_store_folder)
+        data_folder = "./data"
+        pdf_files = [os.path.join(data_folder, file) for file in os.listdir(data_folder) if file.endswith('.pdf')]
+        
+        st.session_state.vector_store = get_vector_store(pdf_files)
+        save_vector_store(vector_store, vector_store_folder)
         
 user_input=st.chat_input("Type your message here...")
 
